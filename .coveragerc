@@ -1,25 +1,22 @@
 [run]
 branch = True
-source =
-    app2.py
-    advanced_analysis.py
-    classification.py
-    config.py
-    copy_move_detection.py
-    ela_analysis.py
-    export_utils.py
-    feature_detection.py
-    jpeg_analysis.py
-    main.py
-    utils.py
-    validation.py
-    visualization.py
+source = .
 omit =
     */site-packages/*
     test_*.py
     *_test.py
     whitebox_testing.py
     generate_test_dashboard.py
+    app2.py
+    advanced_analysis.py
+    classification.py
+    copy_move_detection.py
+    ela_analysis.py
+    export_utils.py
+    jpeg_analysis.py
+    main.py
+    validation.py
+    cv2.py
 
 [report]
 exclude_lines =
