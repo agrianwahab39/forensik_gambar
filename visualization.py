@@ -31,14 +31,12 @@ import warnings
 try:
     from sklearn.metrics import confusion_matrix, accuracy_score
     import seaborn as sns
-
     from scipy.stats import gaussian_kde
     SKLEARN_METRICS_AVAILABLE = True
     SCIPY_AVAILABLE = True
 except Exception:
     SKLEARN_METRICS_AVAILABLE = False
     SCIPY_AVAILABLE = False
-
 
 warnings.filterwarnings('ignore')
 
