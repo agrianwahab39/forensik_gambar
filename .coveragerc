@@ -18,5 +18,14 @@ include =
     feature_detection.py
     visualization.py
     ela_analysis.py
+    advanced_analysis.py
+    app2.py
+    classification.py
+    copy_move_detection.py
+    export_utils.py
+    jpeg_analysis.py
+    main.py
+    validation.py
+
 show_missing = true
 sort = Cover
