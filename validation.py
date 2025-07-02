@@ -6,7 +6,11 @@ import os
 import numpy as np
 from PIL import Image, ImageEnhance
 import cv2
-import exifread
+try:
+    import exifread
+    EXIFREAD_AVAILABLE = True
+except Exception:
+    EXIFREAD_AVAILABLE = False
 from datetime import datetime
 from config import VALID_EXTENSIONS, MIN_FILE_SIZE, TARGET_MAX_DIM
 
@@ -30,7 +34,10 @@ def extract_enhanced_metadata(filepath):
     metadata = {}
     try:
         with open(filepath, 'rb') as f:
-            tags = exifread.process_file(f, details=False, strict=False)
+            if EXIFREAD_AVAILABLE:
+                tags = exifread.process_file(f, details=False, strict=False)
+            else:
+                tags = {}
         
         metadata['Filename'] = os.path.basename(filepath)
         metadata['FileSize (bytes)'] = os.path.getsize(filepath)

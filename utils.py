@@ -3,7 +3,6 @@ Utility functions for Forensic Image Analysis System
 """
 
 import numpy as np
-from scipy.stats import entropy
 import warnings
 import json
 from datetime import datetime

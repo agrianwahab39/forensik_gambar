@@ -5,17 +5,35 @@ Contains functions for creating comprehensive visualizations, plots, and visual 
 
 import numpy as np
 import cv2
-import matplotlib.pyplot as plt
-import matplotlib.gridspec as gridspec
-from matplotlib.backends.backend_pdf import PdfPages
+try:
+    import matplotlib.pyplot as plt
+    import matplotlib.gridspec as gridspec
+    from matplotlib.backends.backend_pdf import PdfPages
+    MATPLOTLIB_AVAILABLE = True
+except Exception:
+    MATPLOTLIB_AVAILABLE = False
+    plt = None
+    class PdfPages:
+        def __init__(self, *a, **k):
+            raise RuntimeError('matplotlib not available')
 from PIL import Image
 from datetime import datetime
-from skimage.filters import sobel
+try:
+    from skimage.filters import sobel
+    SKIMAGE_AVAILABLE = True
+except Exception:
+    SKIMAGE_AVAILABLE = False
+    def sobel(x):
+        return np.zeros_like(x, dtype=float)
 import os
 import io
 import warnings
-from sklearn.metrics import confusion_matrix, accuracy_score
-import seaborn as sns
+try:
+    from sklearn.metrics import confusion_matrix, accuracy_score
+    import seaborn as sns
+    SKLEARN_METRICS_AVAILABLE = True
+except Exception:
+    SKLEARN_METRICS_AVAILABLE = False
 
 warnings.filterwarnings('ignore')
 
@@ -297,23 +315,24 @@ def create_summary_report(ax, analysis_results):
 
 def populate_validation_visuals(ax1, ax2):
     ax1.set_title("14. Validasi Performa (Sample)", fontsize=12)
-    # Metrik kinerja (contoh data)
-    y_true = [0, 1, 1, 0, 1, 0, 0, 1, 1, 1]
-    y_pred = [0, 1, 0, 0, 1, 1, 0, 1, 1, 1]
-    cm = confusion_matrix(y_true, y_pred)
-    accuracy = accuracy_score(y_true, y_pred)
+    if SKLEARN_METRICS_AVAILABLE:
+        y_true = [0, 1, 1, 0, 1, 0, 0, 1, 1, 1]
+        y_pred = [0, 1, 0, 0, 1, 1, 0, 1, 1, 1]
+        cm = confusion_matrix(y_true, y_pred)
+        accuracy = accuracy_score(y_true, y_pred)
+        sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', ax=ax1,
+                    xticklabels=['Asli', 'Manipulasi'],
+                    yticklabels=['Asli', 'Manipulasi'])
+        ax1.set_xlabel("Prediksi")
+        ax1.set_ylabel("Aktual")
+        ax1.set_title(f"14. Confusion Matrix (Acc: {accuracy:.1%})", fontsize=12)
+    else:
+        ax1.text(0.5, 0.5, 'sklearn not available', ha='center')
 
-    sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', ax=ax1,
-                xticklabels=['Asli', 'Manipulasi'],
-                yticklabels=['Asli', 'Manipulasi'])
-    ax1.set_xlabel("Prediksi")
-    ax1.set_ylabel("Aktual")
-    ax1.set_title(f"14. Confusion Matrix (Acc: {accuracy:.1%})", fontsize=12)
-
-    # Grafik kepercayaan (contoh data)
     ax2.set_title("15. Analisis Kepercayaan", fontsize=12)
     scores = np.random.normal(loc=85, scale=10, size=100)
-    sns.histplot(scores, kde=True, ax=ax2, color="purple")
+    if SKLEARN_METRICS_AVAILABLE:
+        sns.histplot(scores, kde=True, ax=ax2, color="purple")
     ax2.set_xlabel("Skor Kepercayaan (%)")
     ax2.set_ylabel("Frekuensi")
     ax2.axvline(np.mean(scores), color='r', linestyle='--', label=f'Mean: {np.mean(scores):.1f}%')
