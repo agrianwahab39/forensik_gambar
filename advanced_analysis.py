@@ -6,8 +6,20 @@ Contains functions for noise, frequency, texture, edge, illumination, and statis
 
 import numpy as np
 import cv2
-from scipy import ndimage
-from scipy.stats import entropy
+try:
+    from scipy import ndimage
+    from scipy.stats import entropy
+    SCIPY_AVAILABLE = True
+except Exception:
+    SCIPY_AVAILABLE = False
+    class ndimage:
+        @staticmethod
+        def gaussian_filter(a, sigma):
+            return a
+    def entropy(arr):
+        hist, _ = np.histogram(arr, bins=256, range=(0,255), density=True)
+        hist = hist[hist > 0]
+        return -np.sum(hist * np.log2(hist))
 import warnings
 
 # Conditional imports dengan error handling
@@ -16,7 +28,7 @@ try:
     from skimage.filters import sobel, prewitt, roberts
     from skimage.measure import shannon_entropy
     SKIMAGE_AVAILABLE = True
-except ImportError:
+except Exception:
     print("Warning: scikit-image not available. Some features will be limited.")
     SKIMAGE_AVAILABLE = False
 

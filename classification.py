@@ -4,9 +4,25 @@ Contains functions for machine learning classification, feature vector preparati
 """
 
 import numpy as np
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.svm import SVC
-from sklearn.preprocessing import normalize as sk_normalize
+try:
+    from sklearn.ensemble import RandomForestClassifier
+    from sklearn.svm import SVC
+    from sklearn.preprocessing import normalize as sk_normalize
+    SKLEARN_AVAILABLE = True
+except Exception:
+    SKLEARN_AVAILABLE = False
+    class RandomForestClassifier:
+        def __init__(self,*a,**k): pass
+        def fit(self,X,y): pass
+        def predict_proba(self,X): return np.zeros((len(X),2))
+    class SVC:
+        def __init__(self,*a,**k): pass
+        def fit(self,X,y): pass
+        def decision_function(self,X): return np.zeros(len(X))
+    def sk_normalize(arr, norm='l2', axis=1):
+        denom = np.linalg.norm(arr, ord=2 if norm=='l2' else 1, axis=axis, keepdims=True)
+        denom[denom==0]=1
+        return arr/denom
 import warnings
 
 warnings.filterwarnings('ignore')

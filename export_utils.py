@@ -12,8 +12,16 @@ from datetime import datetime
 from PIL import Image
 import numpy as np
 import cv2
-import matplotlib.pyplot as plt
-from matplotlib.backends.backend_pdf import PdfPages
+try:
+    import matplotlib.pyplot as plt
+    from matplotlib.backends.backend_pdf import PdfPages
+    MATPLOTLIB_AVAILABLE = True
+except Exception:
+    MATPLOTLIB_AVAILABLE = False
+    plt = None
+    class PdfPages:
+        def __init__(self, *a, **k):
+            raise RuntimeError('matplotlib not available')
 
 # Conditional DOCX import
 try:
@@ -28,8 +36,12 @@ except ImportError:
     print("Warning: python-docx not installed. DOCX export will be unavailable.")
 
 # Import validation metrics
-from sklearn.metrics import confusion_matrix, accuracy_score, precision_score, recall_score, f1_score
-import seaborn as sns
+try:
+    from sklearn.metrics import confusion_matrix, accuracy_score, precision_score, recall_score, f1_score
+    import seaborn as sns
+    SKLEARN_METRICS_AVAILABLE = True
+except Exception:
+    SKLEARN_METRICS_AVAILABLE = False
 
 import warnings
 warnings.filterwarnings('ignore')
@@ -226,23 +238,23 @@ def export_comprehensive_package(original_pil, analysis_results, base_filename="
 
 def export_visualization_png(original_pil, analysis_results, output_filename="forensic_analysis.png"):
     """Export visualization to PNG format with high quality"""
-    print("📊 Creating PNG visualization...")
-    
-    try:
-        # Panggil fungsi yang sudah diperbarui dari visualization.py
-        from visualization import visualize_results_advanced
-        return visualize_results_advanced(original_pil, analysis_results, output_filename)
-    except ImportError:
+    if not MATPLOTLIB_AVAILABLE:
         print("❌ Visualization module not available")
         return None
+    print("📊 Creating PNG visualization...")
+    try:
+        from visualization import visualize_results_advanced
+        return visualize_results_advanced(original_pil, analysis_results, output_filename)
     except Exception as e:
         print(f"❌ Error creating PNG visualization: {e}")
         return None
 
 def export_visualization_pdf(original_pil, analysis_results, output_filename="forensic_analysis.pdf"):
     """Export visualization to PDF format"""
+    if not MATPLOTLIB_AVAILABLE:
+        print("❌ Visualization module not available")
+        return None
     print("📊 Creating PDF visualization...")
-    
     try:
         from visualization import (
             create_feature_match_visualization, create_block_match_visualization,

@@ -4,7 +4,15 @@ Feature detection and matching functions
 
 import numpy as np
 import cv2
-from sklearn.preprocessing import normalize as sk_normalize
+try:
+    from sklearn.preprocessing import normalize as sk_normalize
+    SKLEARN_AVAILABLE = True
+except Exception:
+    SKLEARN_AVAILABLE = False
+    def sk_normalize(arr, norm='l2', axis=1):
+        denom = np.linalg.norm(arr, ord=2 if norm=='l2' else 1, axis=axis, keepdims=True)
+        denom[denom == 0] = 1
+        return arr / denom
 from config import *
 
 def extract_multi_detector_features(image_pil, ela_image_pil, ela_mean, ela_stddev):

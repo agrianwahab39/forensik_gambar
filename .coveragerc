@@ -1,11 +1,5 @@
-# --- FILE .coveragerc BARU YANG BENAR ---
-
 [run]
-# Aktifkan pengukuran branch
 branch = True
-
-# Tentukan file mana saja yang merupakan kode sumber aplikasi Anda.
-# Coverage hanya akan melaporkan file-file ini.
 source =
     app2.py
     advanced_analysis.py
@@ -20,22 +14,15 @@ source =
     utils.py
     validation.py
     visualization.py
-
-# Abaikan file/folder ini dari pengukuran, meskipun diimpor.
 omit =
     */site-packages/*
     test_*.py
     *_test.py
     whitebox_testing.py
     generate_test_dashboard.py
-    venv/*
-    .venv/*
 
 [report]
-# Saat membuat laporan, abaikan baris yang memiliki komentar '# pragma: no cover'
 exclude_lines =
     pragma: no cover
-
-# Tambahkan baris ini untuk melihat laporan yang lebih informatif di terminal
 show_missing = true
 sort = Cover

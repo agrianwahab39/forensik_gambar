@@ -7,7 +7,21 @@ import numpy as np
 import cv2
 import os
 from PIL import Image, ImageChops
-from scipy import ndimage
+try:
+    from scipy import ndimage
+    SCIPY_AVAILABLE = True
+except Exception:
+    SCIPY_AVAILABLE = False
+    class ndimage:
+        @staticmethod
+        def gaussian_filter1d(a, sigma):
+            # simple fallback using convolution
+            kernel_size = int(6*sigma+1)
+            kernel = np.exp(-0.5*((np.arange(kernel_size)-kernel_size//2)/sigma)**2)
+            kernel /= kernel.sum()
+            pad = kernel_size//2
+            a_padded = np.pad(a, pad, mode='edge')
+            return np.convolve(a_padded, kernel, mode='valid')
 from utils import detect_outliers_iqr, safe_divide
 import warnings
 from datetime import datetime
