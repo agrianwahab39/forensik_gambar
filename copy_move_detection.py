@@ -4,8 +4,17 @@ Copy-move detection functions
 
 import numpy as np
 import cv2
-from sklearn.cluster import KMeans, DBSCAN, MiniBatchKMeans
-from sklearn.preprocessing import normalize as sk_normalize
+try:
+    from sklearn.cluster import KMeans, DBSCAN, MiniBatchKMeans
+    from sklearn.preprocessing import normalize as sk_normalize
+    SKLEARN_AVAILABLE = True
+except Exception:
+    SKLEARN_AVAILABLE = False
+    # Provide minimal fallbacks if sklearn is not installed
+    def sk_normalize(arr, norm='l2', axis=1):
+        denom = np.linalg.norm(arr, ord=2 if norm=='l2' else 1, axis=axis, keepdims=True)
+        denom[denom == 0] = 1
+        return arr / denom
 from feature_detection import match_sift_features, match_orb_features, match_akaze_features
 from config import *
 
@@ -279,21 +288,38 @@ def kmeans_tampering_localization(image_pil, ela_image, n_clusters=3):
     print(f"  - Total features for K-means: {len(features)}")
     
     # K-means clustering with error handling
-    try:
-        # Use mini-batch K-means for large datasets
-        if len(features) > 10000:
-            kmeans = MiniBatchKMeans(n_clusters=n_clusters, random_state=42,
-                                   batch_size=100, n_init=3)
-            print("  - Using MiniBatchKMeans for efficiency")
-        else:
-            kmeans = KMeans(n_clusters=n_clusters, random_state=42, n_init=10)
-        
-        cluster_labels = kmeans.fit_predict(features)
-    except MemoryError:
-        print("  ⚠ Memory error in K-means, reducing clusters")
-        n_clusters = 2
-        kmeans = KMeans(n_clusters=n_clusters, random_state=42, n_init=3)
-        cluster_labels = kmeans.fit_predict(features)
+    if SKLEARN_AVAILABLE:
+        try:
+            if len(features) > 10000:
+                kmeans = MiniBatchKMeans(n_clusters=n_clusters, random_state=42,
+                                       batch_size=100, n_init=3)
+                print("  - Using MiniBatchKMeans for efficiency")
+            else:
+                kmeans = KMeans(n_clusters=n_clusters, random_state=42, n_init=10)
+
+            cluster_labels = kmeans.fit_predict(features)
+        except MemoryError:
+            print("  ⚠ Memory error in K-means, reducing clusters")
+            n_clusters = 2
+            kmeans = KMeans(n_clusters=n_clusters, random_state=42, n_init=3)
+            cluster_labels = kmeans.fit_predict(features)
+    else:
+        # Simple numpy-based clustering fallback
+        feature_norm = sk_normalize(features)
+        initial_centers = feature_norm[:n_clusters]
+        centers = initial_centers
+        for _ in range(5):
+            distances = ((feature_norm[:, None, :] - centers[None, :, :])**2).sum(axis=2)
+            labels = distances.argmin(axis=1)
+            new_centers = np.array([feature_norm[labels==i].mean(axis=0) if np.any(labels==i) else centers[i]
+                                     for i in range(n_clusters)])
+            if np.allclose(new_centers, centers):
+                break
+            centers = new_centers
+        cluster_labels = labels
+        class DummyKMeans:
+            cluster_centers_ = centers
+        kmeans = DummyKMeans()
     
     # Create localization map
     localization_map = np.zeros((h, w))
