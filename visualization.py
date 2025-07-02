@@ -31,12 +31,14 @@ import warnings
 try:
     from sklearn.metrics import confusion_matrix, accuracy_score
     import seaborn as sns
+
     from scipy.stats import gaussian_kde
     SKLEARN_METRICS_AVAILABLE = True
     SCIPY_AVAILABLE = True
 except Exception:
     SKLEARN_METRICS_AVAILABLE = False
     SCIPY_AVAILABLE = False
+
 
 warnings.filterwarnings('ignore')
 
@@ -334,12 +336,14 @@ def populate_validation_visuals(ax1, ax2):
 
     ax2.set_title("15. Analisis Kepercayaan", fontsize=12)
     scores = np.random.normal(loc=85, scale=10, size=100)
+
     if SKLEARN_METRICS_AVAILABLE and SCIPY_AVAILABLE:
         sns.histplot(scores, kde=True, ax=ax2, color="purple")
     elif SKLEARN_METRICS_AVAILABLE:
         sns.histplot(scores, kde=False, ax=ax2, color="purple")
     else:
         ax2.hist(scores, bins=10, color="purple", edgecolor="black")
+
     ax2.set_xlabel("Skor Kepercayaan (%)")
     ax2.set_ylabel("Frekuensi")
     ax2.axvline(np.mean(scores), color='r', linestyle='--', label=f'Mean: {np.mean(scores):.1f}%')

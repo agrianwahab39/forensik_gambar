@@ -9,10 +9,13 @@ omit =
     generate_test_dashboard.py
     cv2.py
 
+
 [report]
 exclude_lines =
     pragma: no cover
 include =
+
+source =
     advanced_analysis.py
     app2.py
     classification.py
@@ -26,5 +29,6 @@ include =
     utils.py
     validation.py
     visualization.py
+
 show_missing = true
 sort = Cover
